@@ -26,10 +26,14 @@
 /* =====================
   Define a resetMap function to remove markers from the map and clear the array of markers
 ===================== */
-var resetMap = function() {
+
+var resetMap = function(parsed) {
   /* =====================
     Fill out this function definition
   ===================== */
+  _.each(parsed, function(val){
+    map.removeLayer(val);
+  });
 };
 
 /* =====================
@@ -37,10 +41,19 @@ var resetMap = function() {
   will be called as soon as the application starts. Be sure to parse your data once you've pulled
   it down!
 ===================== */
+var data = [];
 var getAndParseData = function() {
   /* =====================
     Fill out this function definition
   ===================== */
+   $.ajax("https://raw.githubusercontent.com/CPLN690-MUSA610/datasets/master/json/philadelphia-solar-installations.json").done(function(val){
+     var parsed= JSON.parse(val);
+     var mark= _.map(parsed,function(val){
+       data.push(val);
+     });
+
+   });
+
 };
 
 /* =====================
@@ -51,4 +64,34 @@ var plotData = function() {
   /* =====================
     Fill out this function definition
   ===================== */
+  var makeMarkers=function(parsed){
+
+    var filtered=_.filter(parsed,function(val){
+      return((val.YEARBUILT<numericField2 && val.YEARBUILT>numericField1)||val.DEVELOPER===stringField||booleanField===true);
+    });
+
+
+    //var develop=_.filter(parsed,function(val){
+    // return(val.DEVELOPER===stringField);
+    //});
+    //var boo=_.filter(parsed,function(val){
+      //return(booleanField===true);
+    //});
+
+    var mark=_.map(filtered, function(val){
+      console.log('year: ', val.YEARBUILT, 'val: ', val, 'val.LAT', val.LAT, 'val.LONG_', val.LONG_);
+      return L.marker([val.LAT, val.LONG_]);
+    });
+
+    return mark;
+
+  };
+  var plotMarkers=function(mark){
+    _.each(mark,function(val){
+      val.addTo(map);
+    });
+  };
+  var markers=makeMarkers(data);
+  plotMarkers(markers);
+
 };
